@@ -8,7 +8,7 @@
     require_once "src/Book.php";
     require_once "src/Author.php";
 
-    $server = 'mysql:host=localhost;dbname=library';
+    $server = 'mysql:host=localhost;dbname=library_test';
     $username = 'root';
     $password = 'root';
 
