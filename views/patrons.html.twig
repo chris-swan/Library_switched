@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>Library</title>
+</head>
+<body>
+    <h1>Patrons</h1>
+
+    {% if patrons is not empty %}
+        <p>Here are all the patrons:</p>
+        <ul>
+            {% for patron in patrons %}
+                <li><a href="/patron/{{ patron.getId }}">{{patron.getPatronName }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no patrons!</p>
+    {% endif %}
+
+    <h3>Add a Patron</h3>
+    <form action='/patrons' method='post'>
+        <label for='name'>Patron Name</label>
+        <input id='name' name='name' type='text'>
+
+        <button type='submit'>Add Patron</button>
+    </form>
+
+    <p><a href='/'>Home</a></p>
+</body>
+</html>

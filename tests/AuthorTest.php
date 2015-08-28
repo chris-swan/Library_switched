@@ -1,10 +1,12 @@
 <?php
+
     /**
     * @backupGlobals disabled
     * @backupStaticAttributes disabled
     */
+
     require_once "src/Author.php";
-    require_once "src/Book.php";
+    //require_once "src/Book.php";
 
     $server = 'mysql:host=localhost;dbname=library_test';
     $username = 'root';
@@ -18,203 +20,178 @@
             Author::deleteAll();
             Book::deleteAll();
         }
-        function test_getName()
+
+        function test_getAuthorName()
         {
             //Arrange
-            $name = "Stephen King";
-            $id = null;
-            $test_author = new Author($name, $id);
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
+
             //Act
-            $result = $test_author->getName();
+            $result = $test_author->getAuthorName();
+
             //Assert
-            $this->assertEquals($name, $result);
-        }
-        function test_setName()
-        {
-            //Arrange
-            $name = "Stephen King";
-            $id = null;
-            $test_author = new Author($name, $id);
-            //Act
-            $test_author->setName("James Patterson");
-            $result = $test_author->getName();
-            //Assert
-            $this->assertEquals("James Patterson", $result);
+            $this->assertEquals($author_name, $result);
         }
 
         function test_getId()
         {
-           //Arrange
-           $name = "Biology";
-           $id = 1;
-           $test_author = new Author($name, $id);
-           //Act
-           $result = $test_author->getId();
-           //Assert
-           $this->assertEquals(1, $result);
+            //Arrange
+            $author_name = "Jack London";
+            $id = 1;
+            $test_author = new Author($author_name, $id);
+
+            //Act
+            $result = $test_author->getId();
+
+            //Assert
+            $this->assertEquals(true, is_numeric($result));
+
         }
+
         function test_save()
         {
             //Arrange
-            $name = "Stephen King";
-            $id = 1;
-            $test_author = new Author($name, $id);
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
             $test_author->save();
+
             //Act
             $result = Author::getAll();
+
             //Assert
             $this->assertEquals($test_author, $result[0]);
         }
+
+        function test_delete()
+        {
+            //Arrange
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
+            $test_author->save();
+
+            $author_name2 = "Robert Jordan";
+            $test_author2 = new Author($author_name2);
+            $test_author2->save();
+
+            //Act
+            $test_author2->delete();
+            $result = Author::getAll();
+
+            //Assert
+            $this->assertEquals([$test_author], $result);
+        }
+
         function test_getAll()
         {
             //Arrange
-            $name = "Stephen King";
-            $id = 1;
-            $name2 = "James Patterson";
-            $id2 = 2;
-            $test_author = new Author($name, $id);
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
             $test_author->save();
-            $test_course2 = new Author($name2, $id2);
-            $test_course2->save();
+
+            $author_name2 = "Robert Jordan";
+            $test_author2 = new Author($author_name2);
+            $test_author2->save();
+
             //Act
             $result = Author::getAll();
+
             //Assert
-            $this->assertEquals([$test_author, $test_course2], $result);
+            $this->assertEquals($test_author, $result[0]);
         }
+
         function test_deleteAll()
         {
             //Arrange
-            $name = "James Patterson";
-            $id = 1;
-            $name2 = "Stephen King";
-            $id2 = 2;
-            $test_author = new Author($name, $id);
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
             $test_author->save();
-            $test_course2 = new Author($name2, 2, $id2);
-            $test_course2->save();
+
+            $author_name2 = "Robert Jordan";
+            $test_author2 = new Author($author_name2);
+            $test_author2->save();
+
             //Act
             Author::deleteAll();
             $result = Author::getAll();
+
             //Assert
             $this->assertEquals([], $result);
         }
+
         function test_find()
         {
-            //Arrange
-            $name = "James Patterson";
-            $id = 1;
-            $test_author = new Author($name, $id);
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
             $test_author->save();
-            $name2 = "Albebra";
-            $id = 2;
-            $test_author2 = new Author($name2, $id);
+
+            $author_name2 = "Robert Jordan";
+            $test_author2 = new Author($author_name2);
             $test_author2->save();
+
             //Act
             $result = Author::find($test_author->getId());
+
             //Assert
             $this->assertEquals($test_author, $result);
         }
+
+        function test_updateAuthorName()
+        {
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
+            $test_author->save();
+
+            $author_name2 = "Robert Jordan";
+            $test_author->updateAuthorName($author_name2);
+
+            //Act
+            $id = $test_author->getId();
+            $result = new Author($author_name2, $id);
+
+            //Assert
+            $this->assertEquals(Author::find($id), $result);
+        }
+
+        function test_addBook()
+        {
+            //Arrange
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
+            $test_author->save();
+
+            $title = "Sea Wolf";
+            $test_book = new Book($title);
+            $test_book->save();
+
+
+            //Act
+            $result = [$test_book];
+            $test_author->addBook($test_book);
+
+            //Assert
+            $this->assertEquals($test_author->getBooks(), $result);
+        }
+
         function test_getBooks()
         {
             //Arrange
-            $title = "Wesley Pong";
-            $id = 1;
-            $test_book = new Book($title, $id);
+            $author_name = "Jack London";
+            $test_author = new Author($author_name);
+            $test_author->save();
+
+            $title = "Sea Wolf";
+            $test_book = new Book($title);
             $test_book->save();
 
-            $title2 = "Billy Bodega";
-            $id2 = 1;
-            $test_book2 = new Book($title2, $id2);
-            $test_book2->save();
-
-            $name = "James Patterson";
-            $id3 = 2;
-            $test_author = new Author($name, $id3);
-            $test_author->save();
             //Act
-            $test_author->addBook($test_book->getId());
-            $test_author->addBook($test_book2->getId());
+            $result = [$test_author];
+            $test_book->addAuthor($test_author);
+
             //Assert
-            $this->assertEquals($test_author->getBooks(), [$test_book, $test_book2]);
+            $this->assertEquals($test_book->getAuthors(), $result);
         }
 
-        // function test_deleteBook()
-        // {
-        //     //Arrange
-        //     $title = "Wesley Pong";
-        //     $id = 1;
-        //     $test_student = new Book($name ,$id);
-        //     $test_student->save();
-        //     $name2 = "Billy Bodega";
-        //     $id2 = 1;
-        //     $test_student2 = new Book($name2, $enrollment_date2, $id2);
-        //     $test_student2->save();
-        //     $name = "James Patterson";
-        //     $id2 = 2;
-        //      = 'HIST:101';
-        //     $test_author = new Author($name, $id2);
-        //     $test_author->save();
-        //     $test_author->addStudent($test_student->getId());
-        //     $test_author->addStudent($test_student2->getId());
-        //     //Act
-        //     $test_author->deleteStudent($test_student->getId());
-        //     $result = $test_author->getStudents();
-        //     //Assert
-        //     $this->assertEquals([$test_student2], $result);
-        // }
 
-        function test_deleteAllBooks()
-        {
-            //Arrange
-            $name = "Wesley Pong";
-            $id = 1;
-            $test_author = new Author($name, $id);
-            $test_author->save();
-
-            $title = "Billy Bodega";
-            $id2 = 1;
-            $test_book = new Book($title, $id2);
-            $test_book->save();
-
-            $title = "James Patterson";
-            $id3 = 2;
-            $test_book2 = new Book($title, $id3);
-            $test_book2->save();
-            $test_author->addBook($test_book->getId());
-            $test_author->addBook($test_book2->getId());
-            //Act
-            $test_author->deleteAllBooks();
-            $result = $test_author->getBooks();
-            //Assert
-            $this->assertEquals([], $result);
-        }
-
-        function testUpdateName()
-        {
-            //Arrange
-            $name = "Stephen King";
-            $id = 1;
-            $test_author = new Author($name, $id);
-            $test_author->save();
-            $new_name = "James Patterson";
-            //Act
-            $test_author->updateName($new_name);
-            //Assert
-            $this->assertEquals("James Patterson", $test_author->getName());
-        }
-
-        // function testUpdateBook()
-        // {
-        //     //Arrange
-        //     $name = "Psychology 101";
-        //      = "PSY101";
-        //     $test_author = new Author($name, );
-        //     $test_author->save();
-        //     $new_course_number = "PSY101A";
-        //     //Act
-        //     $test_author->updateCourseNumber($new_course_number);
-        //     //Assert
-        //     $this->assertEquals("PSY101A", $test_author->getCourseNumber());
-        // }
     }
- ?>
+?>

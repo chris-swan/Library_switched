@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>Library</title>
+</head>
+<body>
+    <h1>Books</h1>
+
+    {% if books is not empty %}
+        <p>Here are all the books:</p>
+        <ul>
+            {% for book in books %}
+                <li><a href="/book/{{ book.getId }}">{{ book.getTitle }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no books</p>
+    {% endif %}
+
+    <h3>Add a book</h3>
+    <form action='/books' method='post'>
+        <label for='title'>Book title</label>
+        <input id='title' name='title' type='text'>
+
+        <button type='submit'>Add book</button>
+    </form>
+
+    <p><a href='/'>Home</a></p>
+</body>
+</html>

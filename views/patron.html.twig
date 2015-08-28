@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>Library</title>
+
+<body>
+    <h1>{{ patron.getpatronName }}</h1>
+    <h3>Checked out Books </h3>
+    {% if checkouts is not empty %}
+        <ul>
+            {% for checkout in checkouts %}
+                    <li>{{ checkout.gettitle }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            There are currently no books checked out for this patron.
+        </p>
+    {% endif %}
+
+
+    <p><a href='/'>Home</a></p>
+</body>
+</html>

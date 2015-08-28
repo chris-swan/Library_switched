@@ -1,0 +1,55 @@
+<html>
+<head>
+    <title>Library</title>
+
+<body>
+    <h1>{{ book.getTitle }}</h1>
+    <h3>Author(s)</h3>
+    {% if authors is not empty %}
+        <p>Here are the authors for this book:</p>
+        <ul>
+            {% for author in authors %}
+                    <li>{{ author.getAuthorName }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            There are currently no authors for this book.
+        </p>
+    {% endif %}
+
+    <h3>Copies</h3>
+    {% if copies is not empty %}
+        <p>Here are the copies for this book:</p>
+        <ul>
+            {% for copy in copies %}
+                    <li>Book Copy ID:{{ copy }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>
+            There are currently no copies of this book.
+        </p>
+    {% endif %}
+
+    <h4>Add an author to this book:</h4>
+
+    <form action='/add_author' method='post'>
+        <input id="book_id" name="book_id" type="hidden" value="{{ book.getId }}">
+        <label for="author_id">Select an author</label>
+        <select id='author_id' name='author_id' type='text'>
+          {% for author in all_authors %}
+            <option value="{{ author.getId }}"> {{ author.getAuthorName }} </option>
+          {% endfor %}
+        </select>
+        <button type='submit'>Add author</button>
+    </form>
+
+    <form action='/add_copy' method='post'>
+        <input  id="book_id" name="book_id" type="hidden" value="{{ book.getId }}">
+        <button type='submit' >Add copy</button>
+    </form>
+
+    <p><a href='/'>Home</a></p>
+</body>
+</html>

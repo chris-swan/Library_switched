@@ -1,20 +1,27 @@
+
 <?php
-    class Author
-    {
-        private $name;
+    Class Author {
+
         private $id;
-        function __construct($name, $id = null)
+        private $author_name;
+
+        //constructors
+        function __construct($author_name, $id = null)
         {
-            $this->name = $name;
+            $this->author_name = $author_name;
             $this->id = $id;
         }
-        function setName($new_name)
+
+        //Setter
+        function setAuthorName($new_author_name)
         {
-            $this->name = (string) $new_name;
+            $this->author_name = (string) $new_author_name;
         }
-        function getName()
+
+        //Getters
+        function getAuthorName()
         {
-            return $this->name;
+            return $this->author_name;
         }
 
         function getId()
@@ -22,21 +29,28 @@
             return $this->id;
         }
 
+        //Delete a single Author
+        function delete()
+        {
+            $GLOBALS['DB']->exec("DELETE FROM authors WHERE id = {$this->getID()};");
+        }
+
         function save()
         {
-            $GLOBALS['DB']->exec("INSERT INTO authors (name)
-            VALUES ('{$this->getName()}');");
-            $this->id = $GLOBALS['DB']->lastInsertID();
+            $GLOBALS['DB']->exec("INSERT INTO authors (author_name) VALUES ('{$this->getAuthorName()}');");
+            $this->id = $GLOBALS['DB']->lastInsertId();
         }
+
+        //Static Methods
 
         static function getAll()
         {
             $returned_authors = $GLOBALS['DB']->query("SELECT * FROM authors;");
             $authors = array();
             foreach($returned_authors as $author) {
-                $name = $author['name'];
+                $author_name = $author['author_name'];
                 $id = $author['id'];
-                $new_author = new Author($name, $id);
+                $new_author = new Author($author_name, $id);
                 array_push($authors, $new_author);
             }
             return $authors;
@@ -44,14 +58,14 @@
 
         static function deleteAll()
         {
-            $GLOBALS ['DB']->exec("DELETE FROM authors;");
+            $GLOBALS['DB']->exec("DELETE FROM authors;");
         }
 
         static function find($search_id)
         {
-            $found_author = null;
+            $found_author = NULL;
             $authors = Author::getAll();
-            foreach($authors as $author) {
+            foreach ($authors as $author) {
                 $author_id = $author->getId();
                 if ($author_id == $search_id) {
                     $found_author = $author;
@@ -60,21 +74,30 @@
             return $found_author;
         }
 
-        function addBook($book_id)
+        //Update methods
+
+        function updateAuthorName($new_author_name)
         {
-            $GLOBALS['DB']->exec("INSERT INTO authors_books (author_id, book_id)
-                VALUES ({$this->id}, {$book_id})");
+            $GLOBALS['DB']->exec("UPDATE authors SET author_name = '{$new_author_name}' WHERE id = {$this->getId()};");
+            $this->author_name = $new_author_name;
+        }
+
+        //Add get and add book(s)
+        function addBook($book)
+        {
+            $GLOBALS['DB']->exec("INSERT INTO authors_books (author_id, book_id) Values ({$this->getId()}, {$book->getID()});");
         }
 
         function getBooks()
         {
-            $returned_books = $GLOBALS['DB']->query("SELECT books.* FROM
-                books JOIN authors_books ON (books.id = authors_books.book_id)
-                JOIN authors ON (authors.id = authors_books.author_id)
-                WHERE authors.id = {$this->getId()}");
+            $query = $GLOBALS['DB']->query("SELECT books.* FROM
+            authors JOIN authors_books ON (authors.id = authors_books.author_id)
+                    JOIN books ON (authors_books.book_id = books.id)
+            WHERE authors.id = {$this->getID()};");
+            $returned_books = $query->fetchAll(PDO::FETCH_ASSOC);
+
             $books = array();
-            foreach($returned_books as $book)
-            {
+            foreach($returned_books as $book){
                 $title = $book['title'];
                 $id = $book['id'];
                 $new_book = new Book($title, $id);
@@ -83,24 +106,4 @@
             return $books;
         }
 
-        // function deleteBook($book_id)
-        // {
-        //     $GLOBALS['DB']->exec("DELETE FROM authors_books WHERE
-        //         book_id = {$book_id} AND author_id = {$this->id}");
-        // }
-
-        function deleteAllBooks()
-        {
-            $GLOBALS['DB']->exec("DELETE FROM authors_books WHERE author_id = {$this->id}");
-        }
-
-        //Update name
-        function updateName($new_name)
-        {
-            $GLOBALS['DB']->exec("UPDATE authors SET name = '{$new_name}'
-                WHERE id = {$this->getId()}");
-            $this->setName($new_name);
-        }
-
-    }
  ?>

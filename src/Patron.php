@@ -1,110 +1,98 @@
 <?php
-    class Patron
+
+class Patron
+{
+    private $patron_name;
+    private $id;
+
+    function __construct($patron_name, $id = NULL)
     {
-        private $patron;
-        private $id;
-
-        function __construct($patron, $id = null)
-        {
-            $this->patron = $patron;
-            $this->id = $id;
-        }
-        function setpatron($new_patron)
-        {
-            $this->patron = $new_patron;
-        }
-        function getpatron()
-        {
-            return $this->patron;
-        }
-
-        function getId()
-        {
-            return $this->id;
-        }
-
-        function save()
-        {
-            $GLOBALS['DB']->exec("INSERT INTO patrons (patron)
-            VALUES ('{$this->getpatron()}');");
-            $this->id = $GLOBALS['DB']->lastInsertID();
-        }
-
-        static function getAll()
-        {
-            $returned_patrons = $GLOBALS['DB']->query("SELECT * FROM patrons;");
-            var_dump($returned_patrons);
-            $patrons = array();
-            foreach($returned_patrons as $patron) {
-                $patron = $patron['patron'];
-                $id = $patron['id'];
-                $new_patron = new Patron($patron, $id);
-                array_push($patrons, $new_patron);
-            }
-            return $patrons;
-        }
-
-        static function deleteAll()
-        {
-            $GLOBALS ['DB']->exec("DELETE FROM patrons;");
-        }
-
-        static function find($search_id)
-        {
-            $found_patron = null;
-            $patrons = Patron::getAll();
-            foreach($patrons as $patron) {
-                $patron_id = $patron->getId();
-                if ($patron_id == $search_id) {
-                    $found_patron = $patron;
-                }
-            }
-            return $found_patron;
-        }
-
-        function addCheckout($copy_id)
-        {
-            $GLOBALS['DB']->exec("INSERT INTO checkouts (copy_id, patron_id, due_date)
-                VALUES ({$copy_id}, {$this->id}, '{CURDATE(), interval 1 month}')");
-        }
-
-        function getCheckouts()
-        {
-            $returned_checkouts = $GLOBALS['DB']->query("SELECT books.* FROM
-                books JOIN copies ON (books.id = copies.book_id)
-                JOIN checkouts ON (checkouts.copy_id = copies.id)
-                JOIN patrons ON (patrons.id = checkouts.patron_id)
-                WHERE patrons.id = {$this->getId()}");
-                var_dump($returned_checkouts);
-            $checkouts = array();
-            foreach($returned_checkouts as $checkout)
-            {
-                $title = $checkout['title'];
-                $id = $checkout['id'];
-                $new_checkout = new Book($title, $id);
-                array_push($chekcouts, $new_checkout);
-            }
-            return $checkouts;
-        }
-
-        // function deleteBook($book_id)
-        // {
-        //     $GLOBALS['DB']->exec("DELETE FROM authors_books WHERE
-        //         book_id = {$book_id} AND author_id = {$this->id}");
-        // }
-
-        function deleteAllBooks()
-        {
-            $GLOBALS['DB']->exec("DELETE FROM authors_books WHERE author_id = {$this->id}");
-        }
-
-        //Update patron
-        function updatepatron($new_patron)
-        {
-            $GLOBALS['DB']->exec("UPDATE authors SET patron = '{$new_patron}'
-                WHERE id = {$this->getId()}");
-            $this->setpatron($new_patron);
-        }
-
+        $this->patron_name = $patron_name;
+        $this->id = $id;
     }
- ?>
+
+    //Set method
+    function setPatronName($new_patron_name)
+    {
+        $this->patron_name = $new_patron_name;
+    }
+
+    //Get methods
+    function getPatronName()
+    {
+        return $this->patron_name;
+    }
+
+    function getId()
+    {
+        return $this->id;
+    }
+
+    function save()
+    {
+        $GLOBALS['DB']->exec("INSERT INTO patrons (patron_name) VALUES ('{$this->getPatronName()}');");
+        $this->id = $GLOBALS['DB']->lastInsertId();
+    }
+
+    function updatePatronName($new_patron_name)
+    {
+        $GLOBALS['DB']->exec("UPDATE patrons SET patron_name = '{$new_patron_name}' WHERE id = {$this->getId()};");
+        $this->patron_name = $new_patron_name;
+    }
+
+    static function getAll()
+    {
+        $returned_patrons = $GLOBALS['DB']->query("SELECT * FROM patrons;");
+        $patrons = array();
+        foreach($returned_patrons as $patron) {
+            $patron_name = $patron['patron_name'];
+            $id = $patron['id'];
+            $new_patron = new Patron($patron_name, $id);
+            array_push($patrons, $new_patron);
+        }
+        return $patrons;
+    }
+
+    static function deleteAll()
+    {
+        $GLOBALS['DB']->exec("DELETE FROM patrons");
+    }
+
+    static function find($search_id)
+    {
+        $found_patron = NULL;
+        $patrons = Patron::getAll();
+        foreach ($patrons as $patron) {
+            $patron_id = $patron->getId();
+            if ($patron_id == $search_id) {
+                $found_patron = $patron;
+            }
+        }
+        return $found_patron;
+    }
+
+    function addCheckout($copy_id)
+    {
+        $date = date("Y-m-d", strtotime("+1 month"));
+        $GLOBALS['DB']->exec("INSERT INTO checkouts (patron_id, copy_id, due_date)
+            VALUES ({$this->id}, {$copy_id}, '{$date}');");
+    }
+
+    function getCheckouts()
+    {
+        $returned_checkouts = $GLOBALS['DB']->query("SELECT * FROM checkouts
+            WHERE patron_id = {$this->getId()};");
+        $checkouts = array();
+        foreach($returned_checkouts as $checkout)
+        {
+            $patron_id = $checkout['patron_id'];
+            $id = $checkout['id'];
+            $copy_id = $checkout['copy_id'];
+            $due_date = $checkout['due_date'];
+            $new_checkout = new Checkout($due_date, $patron_id, $copy_id, $id);
+            array_push($checkouts, $new_checkout);
+        }
+        return $checkouts;
+    }
+}
+?>
